@@ -9,7 +9,7 @@ import (
 // setupTray configures and creates the system tray icon and menu.
 func (s *Service) systemTray() {
 
-	systray := s.Core().App.SystemTray.New()
+	systray := s.app.SystemTray.New()
 	systray.SetTooltip("Core")
 	systray.SetLabel("Core")
 	//appTrayIcon, _ := d.assets.ReadFile("assets/apptray.png")
@@ -22,7 +22,7 @@ func (s *Service) systemTray() {
 	//	systray.SetIcon(appTrayIcon)
 	//}
 	// Create a hidden window for the system tray menu to interact with
-	trayWindow, _ := s.NewWithStruct(&Window{
+	trayWindow := s.app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Name:      "system-tray",
 		Title:     "System Tray Status",
 		URL:       "system-tray.html",
@@ -33,14 +33,14 @@ func (s *Service) systemTray() {
 	systray.AttachWindow(trayWindow).WindowOffset(5)
 
 	// --- Build Tray Menu ---
-	trayMenu := s.Core().App.Menu.New()
+	trayMenu := s.app.Menu.New()
 	trayMenu.Add("Open Desktop").OnClick(func(ctx *application.Context) {
-		for _, window := range s.Core().App.Window.GetAll() {
+		for _, window := range s.app.Window.GetAll() {
 			window.Show()
 		}
 	})
 	trayMenu.Add("Close Desktop").OnClick(func(ctx *application.Context) {
-		for _, window := range s.Core().App.Window.GetAll() {
+		for _, window := range s.app.Window.GetAll() {
 			window.Hide()
 		}
 	})
@@ -65,7 +65,7 @@ func (s *Service) systemTray() {
 
 	trayMenu.AddSeparator()
 	trayMenu.Add("Quit").OnClick(func(ctx *application.Context) {
-		s.Core().App.Quit()
+		s.app.Quit()
 	})
 
 	systray.SetMenu(trayMenu)

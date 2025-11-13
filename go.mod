@@ -3,7 +3,6 @@ module github.com/Snider/display
 go 1.25
 
 require (
-	github.com/Snider/Core v0.0.0-00010101000000-000000000000
 	github.com/spf13/cobra v1.10.1
 	github.com/wailsapp/wails/v3 v3.0.0-alpha.40
 )
@@ -53,5 +52,3 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
-replace github.com/Snider/Core => github.com/Snider/Core v0.0.0-20251109175535-8a392c7dd132
