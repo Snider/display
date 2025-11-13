@@ -31,6 +31,23 @@ func TestParseWindowOptions(t *testing.T) {
 			},
 		},
 		{
+			name: "All options valid",
+			msg: map[string]any{
+				"name": "secondary",
+				"options": map[string]any{
+					"Title":  "Another Window",
+					"Width":  800.0,
+					"Height": 600.0,
+				},
+			},
+			want: application.WebviewWindowOptions{
+				Name:   "secondary",
+				Title:  "Another Window",
+				Width:  800,
+				Height: 600,
+			},
+		},
+		{
 			name: "Missing options",
 			msg: map[string]any{
 				"name": "main",
@@ -43,6 +60,58 @@ func TestParseWindowOptions(t *testing.T) {
 			name: "Empty message",
 			msg:  map[string]any{},
 			want: application.WebviewWindowOptions{},
+		},
+		{
+			name: "Invalid width type",
+			msg: map[string]any{
+				"name": "main",
+				"options": map[string]any{
+					"Title":  "My App",
+					"Width":  "not a number",
+					"Height": 768.0,
+				},
+			},
+			want: application.WebviewWindowOptions{
+				Name:   "main",
+				Title:  "My App",
+				Height: 768,
+			},
+		},
+		{
+			name: "Invalid height type",
+			msg: map[string]any{
+				"name": "main",
+				"options": map[string]any{
+					"Title":  "My App",
+					"Width":  1024.0,
+					"Height": "not a number",
+				},
+			},
+			want: application.WebviewWindowOptions{
+				Name:  "main",
+				Title: "My App",
+				Width: 1024,
+			},
+		},
+		{
+			name: "Deeply nested and complex message",
+			msg: map[string]any{
+				"name": "main",
+				"options": map[string]any{
+					"Title":  "My App",
+					"Width":  1024.0,
+					"Height": 768.0,
+					"nested": map[string]any{
+						"another_level": "some_value",
+					},
+				},
+			},
+			want: application.WebviewWindowOptions{
+				Name:   "main",
+				Title:  "My App",
+				Width:  1024,
+				Height: 768,
+			},
 		},
 	}
 
@@ -82,6 +151,23 @@ func TestBuildWailsWindowOptions(t *testing.T) {
 			},
 		},
 		{
+			name: "Chaining many options",
+			opts: func() []WindowOption {
+				opts := make([]WindowOption, 1000)
+				for i := 0; i < 1000; i++ {
+					opts[i] = WithTitle("Test")
+				}
+				return opts
+			}(),
+			want: application.WebviewWindowOptions{
+				Name:   "main",
+				Title:  "Test",
+				Width:  1280,
+				Height: 800,
+				URL:    "/",
+			},
+		},
+		{
 			name: "Override options",
 			opts: []WindowOption{
 				&mockWindowOption{
@@ -112,6 +198,28 @@ func TestBuildWailsWindowOptions(t *testing.T) {
 				MaximiseButtonState: application.ButtonDisabled,
 				CloseButtonState:    application.ButtonEnabled,
 				Frameless:           true,
+			},
+		},
+		{
+			name: "Nil options",
+			opts: nil,
+			want: application.WebviewWindowOptions{
+				Name:   "main",
+				Title:  "Core",
+				Width:  1280,
+				Height: 800,
+				URL:    "/",
+			},
+		},
+		{
+			name: "Empty options slice",
+			opts: []WindowOption{},
+			want: application.WebviewWindowOptions{
+				Name:   "main",
+				Title:  "Core",
+				Width:  1280,
+				Height: 800,
+				URL:    "/",
 			},
 		},
 	}
