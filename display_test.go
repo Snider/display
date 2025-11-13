@@ -91,15 +91,27 @@ func TestBuildWailsWindowOptions(t *testing.T) {
 						opts.Width = 1920
 						opts.Height = 1080
 						opts.URL = "/test"
+						opts.AlwaysOnTop = true
+						opts.Hidden = true
+						opts.MinimiseButtonState = application.ButtonHidden
+						opts.MaximiseButtonState = application.ButtonDisabled
+						opts.CloseButtonState = application.ButtonEnabled
+						opts.Frameless = true
 					},
 				},
 			},
 			want: application.WebviewWindowOptions{
-				Name:   "test",
-				Title:  "Test Window",
-				Width:  1920,
-				Height: 1080,
-				URL:    "/test",
+				Name:                "test",
+				Title:               "Test Window",
+				Width:               1920,
+				Height:              1080,
+				URL:                 "/test",
+				AlwaysOnTop:         true,
+				Hidden:              true,
+				MinimiseButtonState: application.ButtonHidden,
+				MaximiseButtonState: application.ButtonDisabled,
+				CloseButtonState:    application.ButtonEnabled,
+				Frameless:           true,
 			},
 		},
 	}
@@ -157,6 +169,36 @@ func TestWindowOptions(t *testing.T) {
 	WithURL("/testurl").Apply(config)
 	if config.URL != "/testurl" {
 		t.Errorf("WithURL() got = %v, want %v", config.URL, "/testurl")
+	}
+
+	WithAlwaysOnTop(true).Apply(config)
+	if !config.AlwaysOnTop {
+		t.Errorf("WithAlwaysOnTop() got = %v, want %v", config.AlwaysOnTop, true)
+	}
+
+	WithHidden(true).Apply(config)
+	if !config.Hidden {
+		t.Errorf("WithHidden() got = %v, want %v", config.Hidden, true)
+	}
+
+	WithMinimiseButtonState(application.ButtonHidden).Apply(config)
+	if config.MinimiseButtonState != application.ButtonHidden {
+		t.Errorf("WithMinimiseButtonState() got = %v, want %v", config.MinimiseButtonState, application.ButtonHidden)
+	}
+
+	WithMaximiseButtonState(application.ButtonDisabled).Apply(config)
+	if config.MaximiseButtonState != application.ButtonDisabled {
+		t.Errorf("WithMaximiseButtonState() got = %v, want %v", config.MaximiseButtonState, application.ButtonDisabled)
+	}
+
+	WithCloseButtonState(application.ButtonEnabled).Apply(config)
+	if config.CloseButtonState != application.ButtonEnabled {
+		t.Errorf("WithCloseButtonState() got = %v, want %v", config.CloseButtonState, application.ButtonEnabled)
+	}
+
+	WithFrameless(true).Apply(config)
+	if !config.Frameless {
+		t.Errorf("WithFrameless() got = %v, want %v", config.Frameless, true)
 	}
 }
 

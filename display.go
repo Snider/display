@@ -120,11 +120,17 @@ func buildWailsWindowOptions(opts ...WindowOption) application.WebviewWindowOpti
 
 	// Create Wails window options
 	return application.WebviewWindowOptions{
-		Name:   winOpts.Name,
-		Title:  winOpts.Title,
-		Width:  winOpts.Width,
-		Height: winOpts.Height,
-		URL:    winOpts.URL,
+		Name:                winOpts.Name,
+		Title:               winOpts.Title,
+		Width:               winOpts.Width,
+		Height:              winOpts.Height,
+		URL:                 winOpts.URL,
+		AlwaysOnTop:         winOpts.AlwaysOnTop,
+		Hidden:              winOpts.Hidden,
+		MinimiseButtonState: winOpts.MinimiseButtonState,
+		MaximiseButtonState: winOpts.MaximiseButtonState,
+		CloseButtonState:    winOpts.CloseButtonState,
+		Frameless:           winOpts.Frameless,
 	}
 }
 

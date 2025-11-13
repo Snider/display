@@ -1,12 +1,20 @@
 package display
 
+import "github.com/wailsapp/wails/v3/pkg/application"
+
 // WindowConfig holds the configuration for a window.
 type WindowConfig struct {
-	Name   string
-	Title  string
-	Width  int
-	Height int
-	URL    string
+	Name                string
+	Title               string
+	Width               int
+	Height              int
+	URL                 string
+	AlwaysOnTop         bool
+	Hidden              bool
+	MinimiseButtonState application.ButtonState
+	MaximiseButtonState application.ButtonState
+	CloseButtonState    application.ButtonState
+	Frameless           bool
 }
 
 // WindowOption is a function that applies a configuration option to a WindowConfig.
@@ -48,5 +56,41 @@ func WithHeight(height int) WindowOption {
 func WithURL(url string) WindowOption {
 	return WindowOptionFunc(func(c *WindowConfig) {
 		c.URL = url
+	})
+}
+
+func WithAlwaysOnTop(alwaysOnTop bool) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.AlwaysOnTop = alwaysOnTop
+	})
+}
+
+func WithHidden(hidden bool) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.Hidden = hidden
+	})
+}
+
+func WithMinimiseButtonState(state application.ButtonState) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.MinimiseButtonState = state
+	})
+}
+
+func WithMaximiseButtonState(state application.ButtonState) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.MaximiseButtonState = state
+	})
+}
+
+func WithCloseButtonState(state application.ButtonState) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.CloseButtonState = state
+	})
+}
+
+func WithFrameless(frameless bool) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.Frameless = frameless
 	})
 }
