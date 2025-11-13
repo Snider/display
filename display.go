@@ -66,6 +66,13 @@ func (s *Service) HandleIPCEvents(c *core.Core, msg core.Message) error {
 
 // handleOpenWindowAction processes a message to configure and create a new window using specified name and options.
 func (s *Service) handleOpenWindowAction(msg map[string]any) error {
+	opts := parseWindowOptions(msg)
+	s.Core().App.Window.NewWithOptions(opts)
+	return nil
+}
+
+// parseWindowOptions extracts window configuration from a map and returns it as WebviewWindowOptions.
+func parseWindowOptions(msg map[string]any) application.WebviewWindowOptions {
 	opts := application.WebviewWindowOptions{}
 	if name, ok := msg["name"].(string); ok {
 		opts.Name = name
@@ -81,8 +88,7 @@ func (s *Service) handleOpenWindowAction(msg map[string]any) error {
 			opts.Height = int(height)
 		}
 	}
-	s.Core().App.Window.NewWithOptions(opts)
-	return nil
+	return opts
 }
 
 // ShowEnvironmentDialog displays a dialog containing detailed information about the application's runtime environment.
@@ -125,6 +131,13 @@ func (s *Service) ServiceStartup(context.Context, application.ServiceOptions) er
 
 // OpenWindow creates a new window with the default options.
 func (s *Service) OpenWindow(opts ...core.WindowOption) error {
+	wailsOpts := buildWailsWindowOptions(opts...)
+	s.Core().App.Window.NewWithOptions(wailsOpts)
+	return nil
+}
+
+// buildWailsWindowOptions creates Wails window options from core window options.
+func buildWailsWindowOptions(opts ...core.WindowOption) application.WebviewWindowOptions {
 	// Default options
 	winOpts := &core.WindowConfig{
 		Name:   "main",
@@ -140,16 +153,13 @@ func (s *Service) OpenWindow(opts ...core.WindowOption) error {
 	}
 
 	// Create Wails window options
-	wailsOpts := application.WebviewWindowOptions{
+	return application.WebviewWindowOptions{
 		Name:   winOpts.Name,
 		Title:  winOpts.Title,
 		Width:  winOpts.Width,
 		Height: winOpts.Height,
 		URL:    winOpts.URL,
 	}
-
-	s.Core().App.Window.NewWithOptions(wailsOpts)
-	return nil
 }
 
 // monitorScreenChanges listens for theme change events and logs when screen configuration changes occur.
