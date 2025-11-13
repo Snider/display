@@ -1,93 +1,52 @@
 package display
 
-import (
-	"github.com/wailsapp/wails/v3/pkg/application"
-)
-
-type WindowOption func(*application.WebviewWindowOptions) error
-
-type Window = application.WebviewWindowOptions
-
-func WindowName(s string) WindowOption {
-	return func(o *Window) error {
-		o.Name = s
-		return nil
-	}
-}
-func WindowTitle(s string) WindowOption {
-	return func(o *Window) error {
-		o.Title = s
-		return nil
-	}
+// WindowConfig holds the configuration for a window.
+type WindowConfig struct {
+	Name   string
+	Title  string
+	Width  int
+	Height int
+	URL    string
 }
 
-func WindowURL(s string) WindowOption {
-	return func(o *Window) error {
-		o.URL = s
-		return nil
-	}
+// WindowOption is a function that applies a configuration option to a WindowConfig.
+type WindowOption interface {
+	Apply(*WindowConfig)
 }
 
-func WindowWidth(i int) WindowOption {
-	return func(o *Window) error {
-		o.Width = i
-		return nil
-	}
+// WindowOptionFunc is a function that implements the WindowOption interface.
+type WindowOptionFunc func(*WindowConfig)
+
+func (f WindowOptionFunc) Apply(c *WindowConfig) {
+	f(c)
 }
 
-func WindowHeight(i int) WindowOption {
-	return func(o *Window) error {
-		o.Height = i
-		return nil
-	}
+func WithName(name string) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.Name = name
+	})
 }
 
-func applyOptions(opts ...WindowOption) *Window {
-	w := &Window{}
-	if opts == nil {
-		return w
-	}
-	for _, o := range opts {
-		if err := o(w); err != nil {
-			return nil
-		}
-	}
-	return w
+func WithTitle(title string) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.Title = title
+	})
 }
 
-// NewWithStruct creates a new window using the provided options and returns its handle.
-func (s *Service) NewWithStruct(options *Window) (*application.WebviewWindow, error) {
-	return s.Core().App.Window.NewWithOptions(*options), nil
+func WithWidth(width int) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.Width = width
+	})
 }
 
-// NewWithOptions creates a new window by applying a series of options.
-func (s *Service) NewWithOptions(opts ...WindowOption) (*application.WebviewWindow, error) {
-	return s.NewWithStruct(applyOptions(opts...))
+func WithHeight(height int) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.Height = height
+	})
 }
 
-// NewWithURL creates a new default window pointing to the specified URL.
-func (s *Service) NewWithURL(url string) (*application.WebviewWindow, error) {
-	return s.NewWithOptions(
-		WindowURL(url),
-		WindowTitle("Core"),
-		WindowHeight(900),
-		WindowWidth(1280),
-	)
+func WithURL(url string) WindowOption {
+	return WindowOptionFunc(func(c *WindowConfig) {
+		c.URL = url
+	})
 }
-
-//// OpenWindow is a convenience method that creates and shows a window from a set of options.
-//func (s *Service) OpenWindow(opts ...WindowOption) error {
-//	_, err := s.NewWithOptions(opts...)
-//	return err
-//}
-
-// SelectDirectory opens a directory selection dialog and returns the selected path.
-func (s *Service) SelectDirectory() (string, error) {
-	dialog := application.OpenFileDialog()
-	dialog.SetTitle("Select Project Directory")
-	return dialog.PromptForSingleSelection()
-}
-
-var instance *Window
-
-func (s *Service) Window() *Window { return instance }

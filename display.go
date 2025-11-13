@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Snider/Core/pkg/core"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
@@ -14,8 +13,8 @@ type Options struct{}
 
 // Service manages windowing, dialogs, and other visual elements.
 type Service struct {
-	*core.Runtime[Options]
-	config core.Config
+	app    *application.App
+	config Options
 }
 
 // newDisplayService contains the common logic for initializing a Service struct.
@@ -24,7 +23,6 @@ func newDisplayService() (*Service, error) {
 }
 
 // New is the constructor for static dependency injection.
-// It creates a Service instance without initializing the core.Runtime field.
 func New() (*Service, error) {
 	s, err := newDisplayService()
 	if err != nil {
@@ -33,41 +31,19 @@ func New() (*Service, error) {
 	return s, nil
 }
 
-// Register is the constructor for dynamic dependency injection (used with core.WithService).
-// It creates a Service instance and initializes its core.Runtime field.
-func Register(c *core.Core) (any, error) {
-	s, err := newDisplayService()
-	if err != nil {
-		return nil, err
-	}
-	s.Runtime = core.NewRuntime(c, Options{})
-	return s, nil
-}
-
-func (s *Service) ServiceName() string { return "github.com/Snider/display" }
-
-// HandleIPCEvents processes IPC messages and performs actions such as opening windows or initializing services based on message types.
-func (s *Service) HandleIPCEvents(c *core.Core, msg core.Message) error {
-	switch m := msg.(type) {
-	case map[string]any:
-		if action, ok := m["action"].(string); ok && action == "display.open_window" {
-			return s.handleOpenWindowAction(m)
-		}
-	case ActionOpenWindow:
-		_, err := s.NewWithStruct(&m.WebviewWindowOptions)
-		return err
-	case core.ActionServiceStartup:
-		return s.ServiceStartup(context.Background(), application.ServiceOptions{})
-	default:
-		c.App.Logger.Error("Display: Unknown message type", "type", fmt.Sprintf("%T", m))
-	}
-	return nil
+// Startup initializes the display service and sets up the main application window and system tray.
+func (s *Service) Startup(ctx context.Context) error {
+	s.app = application.Get()
+	s.app.Logger.Info("Display service started")
+	s.buildMenu()
+	s.systemTray()
+	return s.OpenWindow()
 }
 
 // handleOpenWindowAction processes a message to configure and create a new window using specified name and options.
 func (s *Service) handleOpenWindowAction(msg map[string]any) error {
 	opts := parseWindowOptions(msg)
-	s.Core().App.Window.NewWithOptions(opts)
+	s.app.Window.NewWithOptions(opts)
 	return nil
 }
 
@@ -93,13 +69,13 @@ func parseWindowOptions(msg map[string]any) application.WebviewWindowOptions {
 
 // ShowEnvironmentDialog displays a dialog containing detailed information about the application's runtime environment.
 func (s *Service) ShowEnvironmentDialog() {
-	envInfo := s.Core().App.Env.Info()
+	envInfo := s.app.Env.Info()
 
 	details := "Environment Information:\n\n"
 	details += fmt.Sprintf("Operating System: %s\n", envInfo.OS)
 	details += fmt.Sprintf("Architecture: %s\n", envInfo.Arch)
 	details += fmt.Sprintf("Debug Mode: %t\n\n", envInfo.Debug)
-	details += fmt.Sprintf("Dark Mode: %t\n\n", s.Core().App.Env.IsDarkMode())
+	details += fmt.Sprintf("Dark Mode: %t\n\n", s.app.Env.IsDarkMode())
 	details += "Platform Information:"
 
 	// Add platform-specific details
@@ -113,33 +89,23 @@ func (s *Service) ShowEnvironmentDialog() {
 			envInfo.OSInfo.Version)
 	}
 
-	dialog := s.Core().App.Dialog.Info()
+	dialog := s.app.Dialog.Info()
 	dialog.SetTitle("Environment Information")
 	dialog.SetMessage(details)
 	dialog.Show()
 }
 
-// ServiceStartup initializes the display service and sets up the main application window and system tray.
-func (s *Service) ServiceStartup(context.Context, application.ServiceOptions) error {
-	s.Core().App.Logger.Info("Display service started")
-	s.buildMenu()
-	s.systemTray()
-
-	// This will be updated to use the restored OpenWindow method
-	return s.OpenWindow()
-}
-
 // OpenWindow creates a new window with the default options.
-func (s *Service) OpenWindow(opts ...core.WindowOption) error {
+func (s *Service) OpenWindow(opts ...WindowOption) error {
 	wailsOpts := buildWailsWindowOptions(opts...)
-	s.Core().App.Window.NewWithOptions(wailsOpts)
+	s.app.Window.NewWithOptions(wailsOpts)
 	return nil
 }
 
 // buildWailsWindowOptions creates Wails window options from core window options.
-func buildWailsWindowOptions(opts ...core.WindowOption) application.WebviewWindowOptions {
+func buildWailsWindowOptions(opts ...WindowOption) application.WebviewWindowOptions {
 	// Default options
-	winOpts := &core.WindowConfig{
+	winOpts := &WindowConfig{
 		Name:   "main",
 		Title:  "Core",
 		Width:  1280,
@@ -164,7 +130,7 @@ func buildWailsWindowOptions(opts ...core.WindowOption) application.WebviewWindo
 
 // monitorScreenChanges listens for theme change events and logs when screen configuration changes occur.
 func (s *Service) monitorScreenChanges() {
-	s.Core().App.Event.OnApplicationEvent(events.Common.ThemeChanged, func(event *application.ApplicationEvent) {
-		s.Core().App.Logger.Info("Screen configuration changed")
+	s.app.Event.OnApplicationEvent(events.Common.ThemeChanged, func(event *application.ApplicationEvent) {
+		s.app.Logger.Info("Screen configuration changed")
 	})
 }

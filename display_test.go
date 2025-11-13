@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Snider/Core/pkg/core"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
@@ -58,22 +57,22 @@ func TestParseWindowOptions(t *testing.T) {
 
 // mockWindowOption is a mock implementation of the WindowOption interface for testing.
 type mockWindowOption struct {
-	applyFunc func(*core.WindowConfig)
+	applyFunc func(*WindowConfig)
 }
 
-func (m *mockWindowOption) Apply(opts *core.WindowConfig) {
+func (m *mockWindowOption) Apply(opts *WindowConfig) {
 	m.applyFunc(opts)
 }
 
 func TestBuildWailsWindowOptions(t *testing.T) {
 	tests := []struct {
 		name string
-		opts []core.WindowOption
+		opts []WindowOption
 		want application.WebviewWindowOptions
 	}{
 		{
 			name: "Default options",
-			opts: []core.WindowOption{},
+			opts: []WindowOption{},
 			want: application.WebviewWindowOptions{
 				Name:   "main",
 				Title:  "Core",
@@ -84,9 +83,9 @@ func TestBuildWailsWindowOptions(t *testing.T) {
 		},
 		{
 			name: "Override options",
-			opts: []core.WindowOption{
+			opts: []WindowOption{
 				&mockWindowOption{
-					applyFunc: func(opts *core.WindowConfig) {
+					applyFunc: func(opts *WindowConfig) {
 						opts.Name = "test"
 						opts.Title = "Test Window"
 						opts.Width = 1920
