@@ -1,17 +1,17 @@
-# Core Element Template
+# Display
 
-This repository is a template for developers to create custom HTML elements for the core web3 framework. It includes a Go backend, an Angular custom element, and a full release cycle configuration.
+This repository is a display module for the core web3 framework. It includes a Go backend, an Angular custom element, and a full release cycle configuration.
 
 ## Getting Started
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/core-element-template.git
+    git clone https://github.com/Snider/display.git
     ```
 
 2.  **Install the dependencies:**
     ```bash
-    cd core-element-template
+    cd display
     go mod tidy
     cd ui
     npm install
