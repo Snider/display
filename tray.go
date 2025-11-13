@@ -39,7 +39,7 @@ func (s *Service) systemTray() {
 			window.Show()
 		}
 	})
-	trayMenu.Add("Close Desktop").OnClick(func(ctx *application.Context) {
+	trayMenu.Add("Close Desktop D").OnClick(func(ctx *application.Context) {
 		for _, window := range s.app.Window.GetAll() {
 			window.Hide()
 		}
