@@ -6,7 +6,8 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
-// buildMenu creates and sets the main application menu.
+// buildMenu creates and sets the main application menu. This function is called
+// during the startup of the display service.
 func (s *Service) buildMenu() {
 	appMenu := s.app.Menu.New()
 	if runtime.GOOS == "darwin" {
