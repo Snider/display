@@ -6,7 +6,8 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
-// setupTray configures and creates the system tray icon and menu.
+// systemTray configures and creates the system tray icon and menu. This
+// function is called during the startup of the display service.
 func (s *Service) systemTray() {
 
 	systray := s.app.SystemTray.New()
